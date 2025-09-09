@@ -1,0 +1,12 @@
+torch==2.8.0
+torchvision==0.23.0
+opencv-python==4.12.0.88
+matplotlib==3.10.6
+scikit-learn==1.7.1
+tqdm==4.67.1
+torchaudio==2.8.0
+pandas==2.3.2
+torchinfo==1.8.0
+thop==0.1.1.post2209072238
+wandb==0.21.3
+python-dotenv==1.1.1

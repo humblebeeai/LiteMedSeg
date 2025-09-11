@@ -52,6 +52,11 @@ LiteMedSeg is a collection of lightweight and efficient deep learning models for
    ```bash
    pip install -r requirements.txt
    ```
+4. Environment variables:
+   for using wandb for tracking, update `WANDB_API_KEY` in `.env.example` and run:
+   ```bash
+   cp .env.example .env
+   ```
 
 ### Datasets
 

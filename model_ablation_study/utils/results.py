@@ -7,15 +7,10 @@ import numpy as np
 def save_results_to_csv(results, save_dir="./ablation_evaluation_results", filename='Unet_model_evaluation_results', timestamp=None):
     """Save evaluation results to CSV file"""
     
-    # Add timestamp to filename
-    # if timestamp is None:
-    #     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    # filename_with_timestamp = f"{filename}_{timestamp}.csv"
-
     if timestamp is not None:
-        filename_with_timestamp = f"{filename}_{timestamp}.csv"
+        filename = f"{filename}_{timestamp}.csv"
     else:
-        filename_with_timestamp = f"{filename}.csv"
+        filename = f"{filename}.csv"
 
     # Prepare CSV data
     csv_data = [
@@ -24,7 +19,6 @@ def save_results_to_csv(results, save_dir="./ablation_evaluation_results", filen
         ['Description', results['description']],
         ['Test Loss', f"{results['test_loss']:.4f}"],
         ['Average Dice Score', f"{results['test_dice']:.4f}"],
-        ['Average Hausdorff Distance', f"{results['avg_hd_score']:.4f}"],
         ['Average IoU', f"{results['test_iou']:.4f}"],
         ['Precision', f"{results['precision']:.4f}"],
         ['Recall', f"{results['recall']:.4f}"],
@@ -47,12 +41,12 @@ def save_results_to_csv(results, save_dir="./ablation_evaluation_results", filen
     os.makedirs(save_dir, exist_ok=True)
 
     # Write to CSV
-    with open(os.path.join(save_dir, filename_with_timestamp), 'w', newline='') as csvfile:
+    with open(os.path.join(save_dir, filename), 'w', newline='') as csvfile:
         writer = csv.writer(csvfile)
         writer.writerows(csv_data)
 
-    print(f"\nResults saved to: {save_dir}/{filename_with_timestamp}")
-    return filename_with_timestamp
+    print(f"\nResults saved to: {save_dir}/{filename}")
+    return filename
 
 def plot_ablation_results(results, save_path="./plots"):
     """Plot comprehensive ablation study results"""

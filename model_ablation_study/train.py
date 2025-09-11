@@ -3,18 +3,19 @@ from .utils.results import save_results_to_csv, plot_ablation_results, create_re
 from .engine.trainer import AblationTrainer
 
 
-def run_complete_ablation_study(train_loader, val_loader, test_loader, 
-                               epochs=50, device='mps', save_path="./ablation_study"):
+def run_complete_ablation_study(train_loader, val_loader, test_loader, base_channels=12, dataset_name="CVC-ClinicDB",
+                               epochs=50, device='mps', base_save_path="./ablation_study", use_wandb=True):
     """Run complete ablation study with training and evaluation"""
-    
-    trainer = AblationTrainer(device=device)
 
+    save_path = os.path.join(base_save_path, dataset_name, f"base_channels_{base_channels}")
     os.makedirs(save_path, exist_ok=True)
+
+    trainer = AblationTrainer(device=device, base_channels=base_channels, dataset_name=dataset_name, save_path=save_path, use_wandb=use_wandb)
 
     # Train all models
     print("Starting Complete Ablation Study Training...")
     training_results = trainer.train_all_ablation_models(
-        train_loader, val_loader, epochs=epochs, save_path=f"{save_path}/models"
+        train_loader, val_loader, epochs=epochs
     )
     
     # Test all trained models
@@ -32,7 +33,6 @@ def run_complete_ablation_study(train_loader, val_loader, test_loader,
             'description': result['description'],
             'test_loss': model_results['test_loss'],
             'test_dice': model_results['avg_dice_score'],
-            'avg_hd_score': model_results['avg_hd_score'],
             'test_iou': model_results['avg_iou'],
             'precision': model_results['precision'],
             'recall': model_results['recall'],
@@ -41,7 +41,6 @@ def run_complete_ablation_study(train_loader, val_loader, test_loader,
             'dice_batch_avg': model_results['dice_batch_avg'],
             'total_params': model_results['total_params'],
             'trainable_params': model_results['trainable_params'],
-            # 'parameters': result['history']['parameters'],
             'avg_inference_time': model_results['avg_inference_time'],
             'fps': model_results['fps'],
             'flops': model_results['flops'],
@@ -49,7 +48,7 @@ def run_complete_ablation_study(train_loader, val_loader, test_loader,
             'val_dice': result['history']['best_dice'],
             'config': result['config']
         }
-        save_results_to_csv(test_result, save_dir=f"{save_path}/by_model_evaluation_results", filename=model_name, timestamp=None)
+        save_results_to_csv(test_result, save_dir=f"{save_path}/each_model_evaluation_results", filename=model_name)
 
         test_results.append(test_result)
 

@@ -1,7 +1,6 @@
 import torch
 import numpy as np
 import time
-from scipy.spatial.distance import directed_hausdorff
 
 def dice_score(preds, targets, threshold=0.5):
     preds = (torch.sigmoid(preds) > threshold).float()
@@ -82,38 +81,6 @@ def calculate_dice_score(outputs, masks):
         dice_score = (2 * intersection + 1e-7) / (outputs.sum(dim=(1, 2)).float() + masks.sum(dim=(1, 2)).float() + 1e-7)  # Avoid division by zero
 
     return dice_score
-    
-def calculate_hausdorff_distance(outputs, masks, spacing=(1.0, 1.0)):
-    """
-    Calculates the Average Hausdorff Distance (HD) in mm for segmentation results.
-
-    Args:
-        outputs (torch.Tensor): Model outputs (binary masks), shape [batch_size, height, width].
-        masks (torch.Tensor): Ground truth masks, shape [batch_size, height, width].
-        spacing (tuple): Pixel spacing in mm (height_spacing, width_spacing).
-
-    Returns:
-        torch.Tensor: Average Hausdorff Distance for each sample in the batch, shape [batch_size].
-    """
-
-    with torch.no_grad():
-        outputs = outputs.cpu().numpy().astype(np.bool_)
-        masks = masks.cpu().numpy().astype(np.bool_)
-
-        batch_hd = []
-        for output, mask in zip(outputs, masks):
-            output_points = np.argwhere(output) * spacing
-            mask_points = np.argwhere(mask) * spacing
-
-            if output_points.size == 0 or mask_points.size == 0:
-                batch_hd.append(float('inf'))  # Handle empty masks
-                continue
-
-            hd1 = directed_hausdorff(output_points, mask_points)[0]
-            hd2 = directed_hausdorff(mask_points, output_points)[0]
-            batch_hd.append(max(hd1, hd2))
-
-        return torch.tensor(batch_hd, dtype=torch.float32)
 
 def measure_inference_time(model, test_loader, device, num_warmup=5, num_measure=50):
     """Measure average inference time"""

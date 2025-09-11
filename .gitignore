@@ -1,0 +1,11 @@
+.venv/
+data/
+wandb/
+model_comparisons/
+__pycache__/
+.env
+*.pth
+*.log
+*.csv
+*.png
+*.json

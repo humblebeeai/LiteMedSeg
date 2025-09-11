@@ -1,6 +1,6 @@
 from .model import LightweightDeepSegNet
 
-def create_ablation_models():
+def create_ablation_models(base_channels=12):
     """Factory function to create all ablation study variants"""
     
     configs = {
@@ -68,7 +68,7 @@ def create_ablation_models():
     for name, config in configs.items():
         desc = config.pop('description')
         models[name] = {
-            'model': LightweightDeepSegNet(**config),
+            'model': LightweightDeepSegNet(**config, base_channels=base_channels),
             'description': desc,
             'config': config.copy()
         }

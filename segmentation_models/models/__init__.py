@@ -6,7 +6,4 @@ from .res_unet_pp import *
 from .attention_unet import *
 from .deeplabv3plus import *
 from .trans_unet import *
-from .swin_unet import *
-from .inception_unet import *
-from .r2unet import *
 from .sca_inception_unet import *

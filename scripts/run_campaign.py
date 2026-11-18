@@ -1,5 +1,5 @@
 """
-Batch runner for the revision campaign: loops over models (and optionally
+Batch runner for the experiment campaign: loops over models (and optionally
 seeds) on one dataset, reusing the same leakage-safe split within a
 (dataset, seed) pair so every model in that pass is compared on identical
 train/val/test data. Failures on one model are logged and do not abort the run.

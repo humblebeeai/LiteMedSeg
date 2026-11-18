@@ -1,6 +1,6 @@
 """
-Standalone training entry point (replaces the per-model notebooks for the
-revision campaign), so runs can be launched unattended/in-batch and reproduced
+Standalone training entry point (replaces the per-model notebooks of the earlier release for the
+experiment campaign), so runs can be launched unattended/in-batch and reproduced
 exactly from the command line.
 
 Example:

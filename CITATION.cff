@@ -15,6 +15,8 @@ authors:
   - family-names: "Yoon"
     given-names: "Yourim"
     affiliation: "Gachon University"
+doi: 10.5281/zenodo.24347585
+version: "1.0.0"
 repository-code: "https://github.com/humblebeeai/LiteMedSeg"
 license: MIT
 keywords:

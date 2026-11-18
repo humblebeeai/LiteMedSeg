@@ -1,5 +1,7 @@
 # LiteMedSeg: A Lightweight Framework for Efficient Polyp Segmentation
 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.24347585.svg)](https://doi.org/10.5281/zenodo.24347585)
+
 Official code, trained checkpoints and result files for the paper
 
 > **LiteMedSeg: A Lightweight Framework for Efficient Polyp Segmentation**
@@ -125,7 +127,7 @@ Please read [docs/PROTOCOL.md](docs/PROTOCOL.md) for known limitations, includin
 
 ## Citation
 
-If you use this code, please cite the paper (see [`CITATION.cff`](CITATION.cff)). A DOI-bearing archive of this release is available on Zenodo: **DOI to be added after the first archived release**.
+If you use this code, please cite the paper (see [`CITATION.cff`](CITATION.cff)). An archived copy of release v1.0.0 with a permanent DOI is available on Zenodo: [10.5281/zenodo.24347585](https://doi.org/10.5281/zenodo.24347585).
 
 ## License
 

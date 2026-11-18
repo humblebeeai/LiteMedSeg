@@ -1,0 +1,8 @@
+variant,params_M,cpu_ms,gpu_ms
+full,0.643,31.83,5.89
+bare,0.261,20.64,2.02
+wo_lsk_none,0.565,24.38,3.65
+wo_eca_none,0.643,28.26,5.01
+wo_mpp_none,0.578,27.14,5.35
+wo_hga_none,0.405,28.05,5.19
+baseline_std,7.250,46.09,9.03

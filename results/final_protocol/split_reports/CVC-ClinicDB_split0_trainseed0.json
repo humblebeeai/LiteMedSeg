@@ -1,0 +1,14 @@
+{
+  "dataset_name": "CVC-ClinicDB",
+  "group_strategy": "phash",
+  "n_total": 612,
+  "n_train": 502,
+  "n_val": 60,
+  "n_test": 50,
+  "n_groups_total": 431,
+  "n_groups_train": 344,
+  "n_groups_val": 43,
+  "n_groups_test": 44,
+  "centers_per_split": null,
+  "background_per_split": null
+}

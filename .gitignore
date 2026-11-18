@@ -1,11 +1,20 @@
+# environments, caches, secrets
 .venv/
-data/
-wandb/
-model_comparisons/
 __pycache__/
+*.pyc
 .env
-*.pth
+.pytest_cache/
+# datasets are not redistributed (see docs/DATA.md)
+data/
+datasets/
+# experiment outputs of new runs (released results live in results/ and checkpoints/)
+wandb/
+results/runs/
+results/my_run/
 *.log
-*.csv
-*.png
-*.json
+# large per-run artefacts if you re-run the campaign locally
+results/**/models/
+results/**/history/
+results/**/loss/
+results/**/visualizations/
+results/**/logs/

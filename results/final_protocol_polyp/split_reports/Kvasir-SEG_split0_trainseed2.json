@@ -1,0 +1,14 @@
+{
+  "dataset_name": "Kvasir-SEG",
+  "group_strategy": "phash",
+  "n_total": 1000,
+  "n_train": 799,
+  "n_val": 101,
+  "n_test": 100,
+  "n_groups_total": 996,
+  "n_groups_train": 796,
+  "n_groups_val": 100,
+  "n_groups_test": 100,
+  "centers_per_split": null,
+  "background_per_split": null
+}

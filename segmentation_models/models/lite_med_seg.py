@@ -116,88 +116,92 @@ class EfficientChannelAttention(nn.Module):
 
 class MicroDeformableAttention(nn.Module):
     """
-    Simplified lightweight deformable attention 
-    Uses offset information to modulate spatial attention
+    Hadamard-Gated Attention (HGA). (Class name kept for checkpoint/import compatibility.)
+    The 18-channel output of `descriptor_conv` was called 'offset' in earlier versions; renamed because it is never used for sampling.
+
+    A conv branch predicts 9 paired (dx, dy) descriptors per pixel; their L2 magnitude,
+    averaged over the 9 points, is mapped to a spatial gate g = sigmoid(a * m + b) that
+    multiplies the input (Hadamard product) before multi-head self-attention + residual.
+    The descriptors are NOT used as sampling offsets (no deformable sampling).
+
+    FIX (revision): the previous version zero-initialised the last descriptor conv (then called
+    'offset_conv'), so ||descriptors||_2 = 0 and its gradient was exactly 0 -> the gate was frozen at sigmoid(0)=0.5
+    and the branch never trained. The last conv now has small non-zero random init and the
+    gate has a learnable scale/bias, so gradients reach the whole branch.
+
+    variant (for the HGA decomposition ablation):
+      'full'          : magnitude gate + MHSA            (proposed HGA)
+      'gate_only'     : magnitude gate, no self-attention
+      'attn_only'     : MHSA only, no gate
+      'std_gate_attn' : standard CBAM-style spatial gate (7x7 conv on [mean,max]) + MHSA
     """
-    def __init__(self, dim, num_heads=4, kernel_size=3, dilation=1):
+    def __init__(self, dim, num_heads=4, kernel_size=3, dilation=1, variant='full'):
         super().__init__()
+        assert variant in ('full', 'gate_only', 'attn_only', 'std_gate_attn')
+        self.variant = variant
         self.dim = dim
         self.num_heads = num_heads
         self.head_dim = dim // num_heads
         self.scale = self.head_dim ** -0.5
-        self.kernel_size = kernel_size
-        self.dilation = dilation
-        
-        # Number of sampling points (3x3 = 9 points)
         self.num_points = kernel_size * kernel_size
-        
-        # Simplified offset generation
-        self.offset_conv = nn.Sequential(
-            nn.Conv2d(dim, dim // 4, 3, padding=1, bias=False),
-            nn.BatchNorm2d(dim // 4),
-            nn.ReLU(inplace=True),
-            nn.Conv2d(dim // 4, self.num_points * 2, 3, padding=1)
-        )
-        
-        # Standard multi-head attention components
-        self.q_conv = nn.Conv2d(dim, dim, 1, bias=False)
-        self.k_conv = nn.Conv2d(dim, dim, 1, bias=False)
-        self.v_conv = nn.Conv2d(dim, dim, 1, bias=False)
+
+        if variant in ('full', 'gate_only'):
+            self.descriptor_conv = nn.Sequential(
+                nn.Conv2d(dim, dim // 4, 3, padding=1, bias=False),
+                nn.BatchNorm2d(dim // 4),
+                nn.ReLU(inplace=True),
+                nn.Conv2d(dim // 4, self.num_points * 2, 3, padding=1)
+            )
+            nn.init.normal_(self.descriptor_conv[-1].weight, std=0.02)   # was zeros (dead gradient)
+            nn.init.constant_(self.descriptor_conv[-1].bias, 0.1)
+            self.gate_scale = nn.Parameter(torch.tensor(1.0))
+            self.gate_bias = nn.Parameter(torch.tensor(0.0))
+        elif variant == 'std_gate_attn':
+            self.spatial_conv = nn.Conv2d(2, 1, 7, padding=3)
+
+        if variant != 'gate_only':
+            self.q_conv = nn.Conv2d(dim, dim, 1, bias=False)
+            self.k_conv = nn.Conv2d(dim, dim, 1, bias=False)
+            self.v_conv = nn.Conv2d(dim, dim, 1, bias=False)
+            self.dropout = nn.Dropout(0.1)
         self.proj = nn.Conv2d(dim, dim, 1)
-        self.dropout = nn.Dropout(0.1)
-        
-        # Initialize offset conv to output zeros initially
-        nn.init.constant_(self.offset_conv[-1].weight, 0.)
-        nn.init.constant_(self.offset_conv[-1].bias, 0.)
-        
+
+    def _load_from_state_dict(self, state_dict, prefix, *args, **kwargs):
+        # checkpoints written before the rename used 'offset_conv' (same tensors, only the name changed)
+        for k in [k for k in state_dict if k.startswith(prefix + "offset_conv.")]:
+            state_dict[prefix + "descriptor_conv." + k[len(prefix + "offset_conv."):]] = state_dict.pop(k)
+        super()._load_from_state_dict(state_dict, prefix, *args, **kwargs)
+
+    def spatial_gate(self, x):
+        B, C, H, W = x.shape
+        if self.variant in ('full', 'gate_only'):
+            desc = self.descriptor_conv(x).view(B, self.num_points, 2, H, W)   # paired spatial descriptors
+            mag = torch.norm(desc, dim=2).mean(dim=1, keepdim=True)        # [B,1,H,W]
+            return torch.sigmoid(self.gate_scale * mag + self.gate_bias)
+        if self.variant == 'std_gate_attn':
+            pooled = torch.cat([x.mean(1, keepdim=True), x.amax(1, keepdim=True)], dim=1)
+            return torch.sigmoid(self.spatial_conv(pooled))
+        return None
+
     def forward(self, x):
         B, C, H, W = x.shape
-        
-        # Generate offset predictions
-        offset = self.offset_conv(x)  # [B, 18, H, W]
-        offset = offset.view(B, self.num_points, 2, H, W)  # [B, 9, 2, H, W]
-        
-        # Use offset magnitude as spatial attention weight
-        offset_magnitude = torch.norm(offset, dim=2)  # [B, 9, H, W]
-        spatial_weights = torch.mean(offset_magnitude, dim=1, keepdim=True)  # [B, 1, H, W]
-        spatial_weights = torch.sigmoid(spatial_weights)  # Normalize to [0, 1]
-        
-        # Apply spatial modulation
-        x_modulated = x * spatial_weights
-        
-        # Standard multi-head attention computation
-        q = self.q_conv(x_modulated)  # [B, C, H, W]
-        k = self.k_conv(x_modulated)  # [B, C, H, W]
-        v = self.v_conv(x_modulated)  # [B, C, H, W]
-        
-        # Reshape for multi-head attention
-        q = q.view(B, self.num_heads, self.head_dim, H * W)  # [B, num_heads, head_dim, H*W]
-        k = k.view(B, self.num_heads, self.head_dim, H * W)  # [B, num_heads, head_dim, H*W]
-        v = v.view(B, self.num_heads, self.head_dim, H * W)  # [B, num_heads, head_dim, H*W]
-        
-        # Transpose for attention computation
-        q = q.transpose(-2, -1)  # [B, num_heads, H*W, head_dim]
-        k = k.transpose(-2, -1)  # [B, num_heads, H*W, head_dim]
-        v = v.transpose(-2, -1)  # [B, num_heads, H*W, head_dim]
-        
-        # Compute attention scores
-        attn = torch.matmul(q, k.transpose(-2, -1)) * self.scale  # [B, num_heads, H*W, H*W]
-        attn = F.softmax(attn, dim=-1)
+        gate = self.spatial_gate(x)
+        x_mod = x * gate if gate is not None else x
+
+        if self.variant == 'gate_only':
+            return self.proj(x_mod) + x
+
+        q = self.q_conv(x_mod).view(B, self.num_heads, self.head_dim, H * W).transpose(-2, -1)
+        k = self.k_conv(x_mod).view(B, self.num_heads, self.head_dim, H * W).transpose(-2, -1)
+        v = self.v_conv(x_mod).view(B, self.num_heads, self.head_dim, H * W).transpose(-2, -1)
+        attn = F.softmax(torch.matmul(q, k.transpose(-2, -1)) * self.scale, dim=-1)
         attn = self.dropout(attn)
-        
-        # Apply attention to values
-        out = torch.matmul(attn, v)  # [B, num_heads, H*W, head_dim]
-        
-        # Reshape back to spatial format
-        out = out.transpose(-2, -1)  # [B, num_heads, head_dim, H*W]
-        out = out.contiguous().view(B, C, H, W)  # [B, C, H, W]
-        
-        # Final projection
-        out = self.proj(out)
-        
-        # Residual connection
-        return out + x
-    
+        out = torch.matmul(attn, v).transpose(-2, -1).contiguous().view(B, C, H, W)
+        return self.proj(out) + x
+
+
+HadamardGatedAttention = MicroDeformableAttention
+
 
 class MobilePyramidPooling(nn.Module):
     """Lightweight pyramid pooling with reduced channels"""
@@ -297,7 +301,7 @@ class LightweightDeepSegNet(nn.Module):
     Target: <5M parameters while maintaining novelty
     """
     def __init__(self, in_channels=3, out_channels=1, dropout_rate=0.1, 
-                 base_channels=12, use_deformable=True):
+                 base_channels=12, use_deformable=True, hga_variant='full'):
         super().__init__()
         
         # Much smaller channel progression
@@ -322,7 +326,7 @@ class LightweightDeepSegNet(nn.Module):
         self.bottleneck = LightweightResidualBlock(ch[4], ch[4], dropout_rate)
         
         if use_deformable:
-            self.deform_attn = MicroDeformableAttention(ch[4], num_heads=4)
+            self.deform_attn = MicroDeformableAttention(ch[4], num_heads=4, variant=hga_variant)
         else:
             self.deform_attn = nn.Identity()
             

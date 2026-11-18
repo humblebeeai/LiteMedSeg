@@ -1,0 +1,16 @@
+Metric,Value
+Test Loss,0.3043
+Average Dice Score,0.8407
+Average Hausdorff Distance,34.5195
+Average IoU,0.7613
+Precision,0.9179
+Recall,0.8151
+F1 Score,0.8407
+IoU (batch avg),0.7383
+Dice (batch avg),0.8383
+Total Parameters,"9,163,329"
+Trainable Parameters,"9,163,329"
+Average Inference Time (seconds),0.170666
+FPS (Frames Per Second),5.86
+FLOPs,"34,903,425,024.0"
+GFLOPs,34.9034

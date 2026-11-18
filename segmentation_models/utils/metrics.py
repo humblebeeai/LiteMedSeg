@@ -46,7 +46,33 @@ def calculate_dice_score(outputs, masks, threshold=0.5):
         dice_score = (2 * intersection + 1e-7) / (outputs.sum(dim=(1, 2)).float() + masks.sum(dim=(1, 2)).float() + 1e-7)  # Avoid division by zero
 
     return dice_score
-    
+
+def calculate_precision_recall_f1(outputs, masks, eps=1e-7):
+    """
+    Calculates per-image precision, recall, and F1 score, matching the
+    per-image macro-averaging convention used by calculate_dice_score/calculate_iou.
+
+    Args:
+        outputs (torch.Tensor): Binary predicted masks, shape [batch_size, height, width].
+        masks (torch.Tensor): Ground truth masks, shape [batch_size, height, width].
+
+    Returns:
+        Tuple[torch.Tensor, torch.Tensor, torch.Tensor]: precision, recall, f1 per image, shape [batch_size].
+    """
+    with torch.no_grad():
+        outputs = outputs.long()
+        masks = masks.long()
+
+        tp = (outputs & masks).sum(dim=(1, 2)).float()
+        fp = (outputs & (1 - masks)).sum(dim=(1, 2)).float()
+        fn = ((1 - outputs) & masks).sum(dim=(1, 2)).float()
+
+        precision = (tp + eps) / (tp + fp + eps)
+        recall = (tp + eps) / (tp + fn + eps)
+        f1 = (2 * precision * recall) / (precision + recall + eps)
+
+    return precision, recall, f1
+
 def calculate_hausdorff_distance(outputs, masks, spacing=(1.0, 1.0)):
     """
     Calculates the Average Hausdorff Distance (HD) in mm for segmentation results.

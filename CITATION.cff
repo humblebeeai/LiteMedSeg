@@ -1,0 +1,38 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite the paper and this archived release."
+title: "LiteMedSeg: A Lightweight Framework for Efficient Polyp Segmentation"
+type: software
+authors:
+  - family-names: "Eraliev"
+    given-names: "Oybek"
+    affiliation: "Inha University in Tashkent; Bee Intelligence Global Co., Ltd."
+  - family-names: "Alikhanov"
+    given-names: "Jumabek"
+    affiliation: "Bee Intelligence Global Co., Ltd.; Gachon University"
+  - family-names: "Makhmudov"
+    given-names: "Fazliddin"
+    affiliation: "Gachon University"
+  - family-names: "Yoon"
+    given-names: "Yourim"
+    affiliation: "Gachon University"
+repository-code: "https://github.com/humblebeeai/LiteMedSeg"
+license: MIT
+keywords:
+  - polyp segmentation
+  - lightweight neural networks
+  - medical image segmentation
+  - colonoscopy
+preferred-citation:
+  type: article
+  title: "LiteMedSeg: A Lightweight Framework for Efficient Polyp Segmentation"
+  authors:
+    - family-names: "Eraliev"
+      given-names: "Oybek"
+    - family-names: "Alikhanov"
+      given-names: "Jumabek"
+    - family-names: "Makhmudov"
+      given-names: "Fazliddin"
+    - family-names: "Yoon"
+      given-names: "Yourim"
+  journal: "Scientific Reports"
+  notes: "Under review; update with volume, pages and DOI after publication."

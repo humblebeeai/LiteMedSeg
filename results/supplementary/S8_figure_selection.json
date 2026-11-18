@@ -1,0 +1,142 @@
+{
+  "fig9": [
+    {
+      "dataset": "Kvasir-SEG",
+      "file": "cju1hirfi7ekp0855q0vgm9qq.jpg",
+      "index": 10,
+      "quantile": 0.1,
+      "lite_dice": 0.5334389299583471
+    },
+    {
+      "dataset": "Kvasir-SEG",
+      "file": "cju42m60jlpcm08186kqppzqv.jpg",
+      "index": 45,
+      "quantile": 0.3,
+      "lite_dice": 0.85702462238923
+    },
+    {
+      "dataset": "Kvasir-SEG",
+      "file": "cju35k2fr3vc50988c85qkrwg.jpg",
+      "index": 37,
+      "quantile": 0.5,
+      "lite_dice": 0.9050227246252764
+    },
+    {
+      "dataset": "Kvasir-SEG",
+      "file": "cju5ygh1zmmdi0755uod5e17i.jpg",
+      "index": 58,
+      "quantile": 0.7,
+      "lite_dice": 0.9445642669778808
+    },
+    {
+      "dataset": "Kvasir-SEG",
+      "file": "cju83wwn1k55e0850kw6i2d81.jpg",
+      "index": 76,
+      "quantile": 0.9,
+      "lite_dice": 0.9733361774746871
+    },
+    {
+      "dataset": "CVC-ClinicDB",
+      "file": "523.tif",
+      "index": 38,
+      "quantile": 0.1,
+      "lite_dice": 0.5154660794850008
+    },
+    {
+      "dataset": "CVC-ClinicDB",
+      "file": "351.tif",
+      "index": 24,
+      "quantile": 0.3,
+      "lite_dice": 0.876929863258118
+    },
+    {
+      "dataset": "CVC-ClinicDB",
+      "file": "485.tif",
+      "index": 33,
+      "quantile": 0.5,
+      "lite_dice": 0.9135054985795533
+    },
+    {
+      "dataset": "CVC-ClinicDB",
+      "file": "305.tif",
+      "index": 16,
+      "quantile": 0.7,
+      "lite_dice": 0.9485707305158284
+    },
+    {
+      "dataset": "CVC-ClinicDB",
+      "file": "140.tif",
+      "index": 4,
+      "quantile": 0.9,
+      "lite_dice": 0.9692990636775122
+    }
+  ],
+  "fig10": [
+    {
+      "category": "Small polyp (missed)",
+      "dataset": "PolypGen",
+      "file": "C4_22_endocv2021_positive_625.jpg",
+      "index": 108,
+      "dice": 4.3478260850661626e-10,
+      "gt_area": 230,
+      "pred_area": 0,
+      "specular": 0.017425537109375,
+      "fg_bg_contrast": 1.039691539095557
+    },
+    {
+      "category": "Atypical background (missed)",
+      "dataset": "PolypGen",
+      "file": "C2_EndoCV2021_001043.jpg",
+      "index": 32,
+      "dice": 1.4602803738104514e-11,
+      "gt_area": 6848,
+      "pred_area": 0,
+      "specular": 0.0255279541015625,
+      "fg_bg_contrast": 5.143533882751214
+    },
+    {
+      "category": "Specular highlight (poor overlap)",
+      "dataset": "Kvasir-SEG",
+      "file": "cju6vifjlv55z0987un6y4zdo.jpg",
+      "index": 60,
+      "dice": 0.2544879021783573,
+      "gt_area": 40255,
+      "pred_area": 5869,
+      "specular": 0.034912109375,
+      "fg_bg_contrast": 74.2255485407736
+    },
+    {
+      "category": "Under-segmentation (partial overlap)",
+      "dataset": "Kvasir-SEG",
+      "file": "ck2bxiswtxuw80838qkisqjwz.jpg",
+      "index": 98,
+      "dice": 0.4707267304989517,
+      "gt_area": 28992,
+      "pred_area": 9234,
+      "specular": 0.0333251953125,
+      "fg_bg_contrast": 84.06494558879055
+    },
+    {
+      "category": "False positive (empty mask)",
+      "dataset": "PolypGen",
+      "file": "C1_100S0001.jpg",
+      "index": 0,
+      "dice": 1.0180189351418301e-11,
+      "gt_area": 0,
+      "pred_area": 9823,
+      "specular": 0.0097503662109375,
+      "fg_bg_contrast": 0.0
+    },
+    {
+      "category": "Large polyp, largely missed",
+      "dataset": "Kvasir-SEG",
+      "file": "cju88l66no10s0850rsda7ej1.jpg",
+      "index": 84,
+      "dice": 0.29595135221748126,
+      "gt_area": 53243,
+      "pred_area": 9247,
+      "specular": 0.007476806640625,
+      "fg_bg_contrast": 60.83429809300513
+    }
+  ]
+}
